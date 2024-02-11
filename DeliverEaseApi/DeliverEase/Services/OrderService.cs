@@ -37,26 +37,10 @@ namespace DeliverEase.Services
 
         public async Task<string> CreateOrderAsync(string restaurantId, string userId, List<string> mealIds)
         {
-            // var restaurant = await _restaurantService.GetRestaurantByIdAsync(restaurantId);
-            // if (restaurant == null)
-            // {
-            //     return false;
-            // }
-
-            var restaurantMeals = await _restaurantService.GetAllMealsInRestaurantAsync(restaurantId);
-
-            var totalQuantity = 0;
-            var totalPrice = 0.0;
-
-            foreach (var mealId in mealIds)
+            var restaurant = await _restaurantService.GetRestaurantByIdAsync(restaurantId);
+            if (restaurant == null)
             {
-                var meal = restaurantMeals.FirstOrDefault(m=> m.Id==mealId);
-                if (meal == null)
-                {
-                    return null;
-                }
-                totalQuantity++;
-                totalPrice += meal.Price;
+                return null;
             }
 
             var user = await _userService.GetUserByIdAsync(userId);
@@ -65,24 +49,33 @@ namespace DeliverEase.Services
                 return null;
             }
 
+            var restaurantMeals = await _restaurantService.GetAllMealsInRestaurantAsync(restaurantId);
+
+            var meals = new List<Meal>();
+
+            foreach (var mealId in mealIds)
+            {
+                var meal = restaurantMeals.FirstOrDefault(m => m.Id == mealId);
+                if (meal == null)
+                {
+                    return null;
+                }
+                meals.Add(meal);
+            }
+
+            var quantity = meals.Count;
+
+            var totalPrice = meals.Sum(meal => meal.Price);
+
             var newOrder = new Order
             {
                 RestaurantId = restaurantId,
                 UserId = userId,
-                Quantity = totalQuantity,
-                TotalPrice = totalPrice, 
-                Meals = new List<Meal>(),
+                Quantity = quantity,
+                TotalPrice = totalPrice,
+                Meals = meals,
                 OrderTime = DateTime.Now
             };
-
-            foreach (var mealId in mealIds)
-            {
-                var meal = restaurantMeals.FirstOrDefault(m => m.Id == mealId);                
-                if (meal != null)
-                {
-                    newOrder.Meals.Add(meal);
-                }
-            }
 
             await _orders.InsertOneAsync(newOrder);
 
@@ -121,16 +114,18 @@ namespace DeliverEase.Services
             var totalPrice = meals.Sum(meal => meal.Price);
 
 
-            var orderTime = DateTime.Now;
+            var newOrder = new Order
+            {
+                Id = id,
+                UserId = order.UserId,
+                RestaurantId = order.RestaurantId,
+                Meals = meals,
+                Quantity = quantity,
+                TotalPrice = totalPrice,
+                OrderTime = DateTime.Now
+            };
 
-            var filter = Builders<Order>.Filter.Eq(order => order.Id, id);
-            var update = Builders<Order>.Update
-                .Set(order => order.Meals, meals)
-                .Set(order => order.Quantity, quantity)
-                .Set(order => order.TotalPrice, totalPrice)
-                .Set(order => order.OrderTime, orderTime);
-
-            await _orders.UpdateOneAsync(filter, update);
+            var result = await _orders.ReplaceOneAsync(o => o.Id == id, newOrder);
         }
 
 

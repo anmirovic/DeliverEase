@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Mongo\\DeliverEase\\DeliverEase.csproj": {}
+    "D:\\DeliverEase\\DeliverEaseApi\\DeliverEase\\DeliverEase.csproj": {}
   },
   "projects": {
-    "D:\\Mongo\\DeliverEase\\DeliverEase.csproj": {
+    "D:\\DeliverEase\\DeliverEaseApi\\DeliverEase\\DeliverEase.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Mongo\\DeliverEase\\DeliverEase.csproj",
+        "projectUniqueName": "D:\\DeliverEase\\DeliverEaseApi\\DeliverEase\\DeliverEase.csproj",
         "projectName": "DeliverEase",
-        "projectPath": "D:\\Mongo\\DeliverEase\\DeliverEase.csproj",
-        "packagesPath": "C:\\Users\\anastasija\\.nuget\\packages\\",
-        "outputPath": "D:\\Mongo\\DeliverEase\\obj\\",
+        "projectPath": "D:\\DeliverEase\\DeliverEaseApi\\DeliverEase\\DeliverEase.csproj",
+        "packagesPath": "C:\\Users\\nikola\\.nuget\\packages\\",
+        "outputPath": "D:\\DeliverEase\\DeliverEaseApi\\DeliverEase\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\anastasija\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\nikola\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -40,6 +40,14 @@
         "net7.0": {
           "targetAlias": "net7.0",
           "dependencies": {
+            "BCrypt.Net-Next": {
+              "target": "Package",
+              "version": "[4.0.3, )"
+            },
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[7.0.15, )"
+            },
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
               "version": "[7.0.13, )"

@@ -7,47 +7,23 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using BCrypt.Net;
+using DeliverEase.Helpers;
+using Amazon.Runtime.Internal;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace DeliverEase.Services
 {
     public class UserService
     {
         private readonly IMongoCollection<User> _users;
-        private readonly string _jwtSecret;
-        private readonly int _jwtExpirationMinutes = 1440;
+        private JwtService jwtService { get; set; }
 
-      
         public UserService(IMongoDatabase database)
         {
             _users = database.GetCollection<User>("Users");
-            _jwtSecret = _jwtSecret = GenerateRandomKey(2048);
-        }
-
-        private string GenerateRandomKey(int keySize)
-        {
-                var rsa = new RSACng(keySize);
-                RSAParameters parameters = rsa.ExportParameters(true);
-                byte[] key = parameters.Modulus;
-                return Convert.ToBase64String(key);
-        }
-
-        public string GenerateJwtToken(string userId)
-        {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Convert.FromBase64String(_jwtSecret);
-
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim(ClaimTypes.Name, userId)
-                }),
-                Expires = DateTime.UtcNow.AddMinutes(_jwtExpirationMinutes),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
+            jwtService = new JwtService();
         }
 
         public async Task<User> RegisterUser(User newUser)
@@ -57,7 +33,7 @@ namespace DeliverEase.Services
             {
                 throw new Exception("Email is already taken.");
             }
-
+            newUser.Password = BCrypt.Net.BCrypt.HashPassword(newUser.Password);
             await _users.InsertOneAsync(newUser);
             return newUser;
         }
@@ -65,16 +41,27 @@ namespace DeliverEase.Services
 
         public async Task<string> LoginUser(string email, string password)
         {
-            var user = await _users.Find(u => u.Email == email && u.Password == password).FirstOrDefaultAsync();
+            var user = await _users.Find(u => u.Email == email).FirstOrDefaultAsync();
             if (user == null)
             {
-                throw new Exception("Invalid email or password.");
+                throw new Exception("Invalid email");
             }
 
-            var token = GenerateJwtToken(user.Id.ToString());
+            if (!BCrypt.Net.BCrypt.Verify(password, user.Password)) throw new Exception("Invalid password");
+
+            var token = jwtService.Generate(user.Id.ToString());
+
             return token;
         }
+        public async Task<User> GetUser(string jwt)
+        {
+            var token = jwtService.Verify(jwt);
 
+            string userId = token.Issuer;
+
+            return await _users.Find(user => user.Id == userId).FirstOrDefaultAsync();
+
+        }
 
         public async Task<List<User>> GetUsersAsync()
         {

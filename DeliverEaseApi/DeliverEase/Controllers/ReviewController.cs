@@ -124,10 +124,10 @@ namespace DeliverEase.Controllers
                 
                 var ratings = await _reviewService.GetReviewsForUserAsync(userId);
 
-                if (ratings == null || ratings.Count == 0)
-                {
-                    return NotFound($"No ratings found for user with ID {userId}.");
-                }
+                //if (ratings == null || ratings.Count == 0)
+                //{
+                //    return NotFound($"No ratings found for user with ID {userId}.");
+                //}
 
                 return Ok(ratings);
             }

@@ -1,0 +1,13 @@
+#root {
+  text-align: center;
+}
+
+.restaurant-card:hover{
+  cursor:pointer;
+}
+
+.meal-card:hover{
+  cursor:pointer;
+}
+
+
