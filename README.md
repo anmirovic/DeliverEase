@@ -1,10 +1,12 @@
-# DeliverEase
-DeliverEase projekat za Napredne Baze Podataka
+# DeliverEase  
+**DeliverEase - MongoDB Project**  
 
-Nikola Đorđević 18153, Anastasija Mirović 18281
+- MongoDB is running via **Docker**  
+- Backend can be started with:  
+  ```sh
+  dotnet watch run
 
-Mongo pokrenut preko dockera
-
-Backend se pokreće komandom: dotnet watch run
-
-Frontend se pokreće komandama: npm i, npm run dev
+- Frontend can be started with:
+  ```sh
+  npm i  
+  npm run dev
